@@ -33,7 +33,9 @@
   --stage: #070A18;
 }
 * { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; overflow-x: hidden; overflow-x: clip; }
+img, canvas, svg, video { max-width: 100%; }
+section[id], #top { scroll-margin-top: 78px; }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
 body {
   margin: 0; color: var(--ink);
@@ -134,8 +136,14 @@ section:hover .folio .no, header.hero .folio .no { transform: rotate(-4deg) scal
   #navToggle { display: inline-flex; }
   .mast-nav { display: none; width: 100%; flex-direction: column; align-items: stretch; margin-left: 0; padding: 6px 0 10px; }
   .mast-nav.open { display: flex; }
-  .mast-nav a { padding: 10px 4px; border-bottom: 1px solid var(--line); }
+  .mast-nav a { padding: 10px 4px; border-bottom: 1px solid var(--line); min-height: 48px; display: flex; align-items: center; }
   .mast-meta { display: none; }
+  .masthead .bar { align-items: center; flex-wrap: wrap; row-gap: 4px; }
+  #navToggle { width: 44px; height: 44px; flex: none; }
+}
+@media (max-width: 480px) {
+  .mast-name { font-size: 0.92rem; letter-spacing: 0; }
+  .mast-name em { font-size: 0.92rem; }
 }
 
 /* ---------- hero ---------- */
@@ -515,6 +523,113 @@ footer .top-link { font-weight: 800; text-decoration: none; border-bottom: 2px s
   .roadmap { padding-left: 26px; margin-left: 4px; }
   .mile::before { left: -33px; }
   .contactblock { box-shadow: 6px 6px 0 rgba(255,122,26,0.14); }
+}
+
+/* ================= MOBILE PASS (<=640px, tuned at 390px) ================= */
+@media (max-width: 640px) {
+  .wrap { padding: 0 16px; }
+  section { padding-top: 36px; }
+  section[id], #top { scroll-margin-top: 70px; }
+
+  /* hero: name + photo stack cleanly, nothing clipped */
+  h1.headline { font-size: clamp(2.55rem, 11.5vw, 3.4rem); line-height: 0.95; margin-top: 18px; }
+  .dateline { font-size: 0.62rem; letter-spacing: 0.07em; gap: 4px 12px; line-height: 1.5; }
+  .herogrid { gap: 24px; margin-top: 26px; }
+  .kicker { font-size: 0.66rem; letter-spacing: 0.14em; line-height: 1.6; }
+  .roleline { max-width: none; }
+  .lede { font-size: 1rem; max-width: none; }
+  .personcard { padding: 13px 13px 2px; }
+  .personcard .dossier-photo img { width: auto; max-width: 100%; max-height: 320px; margin: 0 auto; }
+  .personcard .pc-name { font-size: 1.02rem; }
+  .stickers { gap: 8px; }
+  .sticker { font-size: 0.6rem; padding: 6px 9px; }
+  .storylink a, .projlink a { display: inline-block; padding: 10px 2px 12px; }
+  .stats { margin-top: 24px; }
+  .stat { padding: 10px 11px; }
+  .stat span { max-width: none; font-size: 0.76rem; }
+
+  /* terminal strip: fits the screen, wraps instead of overflowing */
+  .termstrip { max-width: none; font-size: 0.72rem; line-height: 1.55; padding: 9px 11px; box-shadow: 4px 4px 0 rgba(12,18,38,0.9); }
+  .termstrip .t-text { min-height: 1.55em; }
+
+  /* solar system: square-ish stage, compact chrome, no HUD/zoom overlap */
+  .solarsection { padding-top: 30px; }
+  .solarstage { aspect-ratio: 1 / 1; min-height: 330px; }
+  .figtag { top: 8px; left: 8px; font-size: 0.58rem; padding: 5px 8px; letter-spacing: 0.1em; }
+  .solar-hud { left: 8px; bottom: 8px; font-size: 0.57rem; letter-spacing: 0.02em; padding: 5px 8px; max-width: calc(100% - 124px); line-height: 1.45; }
+  .zoomctl { right: 8px; bottom: 8px; gap: 6px; }
+  .zoomctl button { width: 44px; height: 44px; font-size: 1.25rem; }
+  #planetTip { min-width: 0; max-width: min(230px, calc(100% - 16px)); padding: 9px 11px; }
+  #planetTip .pt-name { font-size: 0.92rem; }
+  .planetdrawer { bottom: 60px; }
+  .planetdrawer .pd-close { width: 40px; height: 40px; }
+  .planet-label { font-size: 0.46rem; padding: 1px 4px; gap: 3px; letter-spacing: 0.05em; }
+  .planet-label .pl-dot { width: 4px; height: 4px; }
+  .planet-label.is-sun { font-size: 0.54rem; padding: 2px 6px; }
+
+  /* section headers */
+  h2.sectitle { font-size: clamp(1.85rem, 8.6vw, 2.6rem); max-width: none; }
+  .secsub { font-size: 0.97rem; }
+  .folio { gap: 10px; font-size: 0.64rem; letter-spacing: 0.13em; }
+
+  /* about */
+  .aboutmain p { font-size: 1rem; }
+  .aboutmain p:first-of-type { font-size: 1.08rem; }
+  .aboutmain p:first-of-type::first-letter { font-size: 3em; padding: 3px 9px 0 0; }
+  .pullquote { padding-left: 16px; }
+  .factbox { max-width: none; }
+
+  /* skills + API playground: JSON wraps, no sideways scroll */
+  .skillrow { padding: 12px 4px 11px; }
+  .skillrow .idx { padding-top: 2px; }
+  .apiplay .ap-body { padding: 12px; gap: 12px; }
+  .apiplay .ap-head { padding: 9px 12px; }
+  .ap-ep { min-height: 44px; padding: 10px 12px; font-size: 0.78rem; }
+  .ap-exec { width: 100%; justify-content: center; min-height: 48px; }
+  .ap-out { font-size: 0.72rem; line-height: 1.55; padding: 11px 12px; white-space: pre-wrap; word-break: break-word; overflow-wrap: anywhere; overflow-x: hidden; min-height: 100px; }
+  .ap-copy { min-height: 40px; padding: 8px 13px; }
+  .learnlist .lstat { padding: 5px 9px; }
+
+  /* experience / roadmap */
+  .expfeature { padding: 16px 14px; }
+  .roadmap { margin-top: 28px; }
+
+  /* project cards: one column, roomy tap targets */
+  .case { padding: 15px 14px 17px; margin-top: 24px; }
+  .case h3 { font-size: clamp(1.65rem, 7.6vw, 2.2rem); }
+  .case .c-meta { gap: 5px 12px; }
+  .case .c-meta .badge { margin-left: 0; }
+  .case .c-link a { display: inline-block; padding: 8px 0; }
+  .stackrow li { padding: 6px 9px; }
+
+  /* education / achievements */
+  .educard { padding: 17px 15px 19px; }
+  .achlist li { padding: 11px 4px; }
+
+  /* contact */
+  .contactblock { padding: 20px 16px 22px; }
+  .contactitem a.c-value { font-size: clamp(1.15rem, 5.6vw, 1.5rem); }
+  .copybtn { min-height: 44px; padding: 10px 16px; }
+  .contactfoot { gap: 10px 14px; }
+  .contactfoot a.btn { flex: 1 1 100%; justify-content: center; min-height: 50px; }
+  footer .top-link { display: inline-block; padding: 10px 0; }
+
+  /* Ask Himaksh AI: panel spans the phone width, 16px input stops iOS zoom */
+  .askfab { right: 12px; bottom: 12px; padding: 12px 16px; font-size: 0.86rem; min-height: 48px; }
+  .askpanel { left: 12px; right: 12px; width: auto; bottom: 72px; height: min(560px, calc(100dvh - 88px)); box-shadow: 6px 6px 0 rgba(12,18,38,0.9), 6px 6px 0 2px var(--sun); }
+  .ask-head { padding: 12px 13px; }
+  .ask-close { width: 44px; height: 44px; }
+  .ask-msgs { padding: 13px; }
+  .ask-msg { max-width: 92%; font-size: 0.9rem; }
+  .ask-chips { padding: 9px 13px 2px; }
+  .ask-chips button { min-height: 40px; padding: 9px 11px; }
+  .ask-form { padding: 10px 13px 13px; }
+  .ask-form input { font-size: 16px; min-height: 48px; }
+  .ask-form button { min-height: 48px; padding: 0 16px; }
+}
+@media (max-width: 380px) {
+  .solar-hud { display: none; }
+  h1.headline { font-size: 2.45rem; }
 }
 
     </style>
@@ -1315,6 +1430,7 @@ footer .top-link { font-weight: 800; text-decoration: none; border-bottom: 2px s
           var scene = new THREE.Scene();
           var camera = new THREE.PerspectiveCamera(42, 1, 0.1, 200);
           var camZ = 34, camZTarget = 34;
+          var userZoomed = false, fitZ = 34, fitSnapped = false;
           camera.position.set(0, 7.5, camZ);
 
           scene.add(new THREE.AmbientLight(0x8899bb, 0.7));
@@ -1562,17 +1678,34 @@ footer .top-link { font-weight: 800; text-decoration: none; border-bottom: 2px s
           });
           renderer.domElement.addEventListener("wheel", function (e) {
             e.preventDefault();
-            camZTarget = Math.max(19, Math.min(46, camZTarget + e.deltaY * 0.02));
+            userZoomed = true;
+            camZTarget = Math.max(19, Math.min(68, camZTarget + e.deltaY * 0.02));
           }, { passive: false });
-          document.getElementById("zoomIn").addEventListener("click", function () { camZTarget = Math.max(19, camZTarget - 5); });
-          document.getElementById("zoomOut").addEventListener("click", function () { camZTarget = Math.min(46, camZTarget + 5); });
+          document.getElementById("zoomIn").addEventListener("click", function () { userZoomed = true; camZTarget = Math.max(19, camZTarget - 5); });
+          document.getElementById("zoomOut").addEventListener("click", function () { userZoomed = true; camZTarget = Math.min(68, camZTarget + 5); });
 
+          /* fit the whole system (outermost orbit a=22.6) inside the stage:
+             portrait stages need the camera much further back than desktop */
+          function computeFitZ() {
+            var w = stage.clientWidth, h = stage.clientHeight;
+            if (!w || !h) return 34;
+            var asp = w / h;
+            if (asp >= 1.55) return 34;
+            if (asp >= 1.25) return 43;
+            if (asp >= 1.0) return 53;
+            return 59;
+          }
           function resize() {
             var w = stage.clientWidth, h = stage.clientHeight;
             if (!w || !h) return;
             renderer.setSize(w, h, false);
             camera.aspect = w / h;
             camera.updateProjectionMatrix();
+            fitZ = computeFitZ();
+            if (!userZoomed) {
+              camZTarget = fitZ;
+              if (!fitSnapped) { camZ = fitZ; fitSnapped = true; }
+            }
           }
           window.addEventListener("resize", resize);
           resize();
@@ -1612,8 +1745,9 @@ footer .top-link { font-weight: 800; text-decoration: none; border-bottom: 2px s
               po.glow.material.opacity = isHover ? 0.95 : 0.55;
               po.mesh.material.emissiveIntensity = isHover ? 0.55 : 0.14;
             });
-            placeLabel(sunLabel, sunGroup, 58);
-            planetObjs.forEach(function (po) { placeLabel(po.label, po.grp, 24 + po.cfg.size * 16); });
+            var smallStage = stage.clientWidth < 640;
+            placeLabel(sunLabel, sunGroup, smallStage ? 38 : 58);
+            planetObjs.forEach(function (po) { placeLabel(po.label, po.grp, smallStage ? (15 + po.cfg.size * 10) : (24 + po.cfg.size * 16)); });
             if (hovered === sun) { sun.scale.setScalar(1 + (1.12 - sun.scale.x) * Math.min(1, dt * 10)); }
             else { sun.scale.setScalar(1 + (1 - sun.scale.x) * Math.min(1, dt * 10)); }
 
