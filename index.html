@@ -22,7 +22,7 @@
   --ink: #E9EDFB;
   --soft: #C3CBE8;
   --muted: #98A3C8;
-  --faint: #66739C;
+  --faint: #6E7CA6;
   --sun: #FF7A1A;
   --sun-deep: #E85D04;
   --amber: #FFB347;
@@ -76,7 +76,7 @@ button { font: inherit; cursor: pointer; }
 @keyframes floatSoft { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
 @keyframes twinkleStar { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
 @keyframes orbitPulse { 0%, 100% { box-shadow: 0 0 0 5px rgba(255,122,26,0.18); } 50% { box-shadow: 0 0 0 9px rgba(255,122,26,0.06); } }
-.dateline .avail::before, .contactfoot .avail::before, .badge.live::before { animation: pulseDot 2.4s ease-in-out infinite; }
+.dateline .avail::before, .contactfoot .avail::before { animation: pulseDot 2.4s ease-in-out infinite; }
 .mile.now::before { animation: orbitPulse 2.6s ease-in-out infinite; }
 .figtag i { animation: twinkleStar 3.2s ease-in-out infinite; }
 .personcard .pc-mono { animation: floatSoft 5s ease-in-out infinite; }
@@ -108,6 +108,88 @@ section:hover .folio .no, header.hero .folio .no { transform: rotate(-4deg) scal
   .case:hover, .expfeature:hover, .apiplay:hover, .educard:hover, .factbox:hover, .personcard:hover, .contactblock:hover, .stat:hover, .achlist li:hover, .learnlist li:hover, .stackrow li:hover, .mile:hover, .sticker:hover { transform: none !important; }
 }
 
+/* ---------- gentle float — cards & sections only, with 3D card reflection ---------- */
+/* Only cards and section blocks drift: project cards, skill rows, education
+   cards (each individually), achievement items, the person card, the fact box,
+   badges, and the section cards (experience feature, API playground, contact
+   block, stats, hero meta). Headings, section titles, paragraphs, labels and
+   all other body text sit still — they carry no float animation at all.
+   The drift runs on the composited translate/rotate properties (transform
+   family, no layout work), so the reveal entrance, hover lifts and badge
+   tilts — all on `transform` — keep working underneath. Amplitudes are a
+   gentle 6–10px up and down, durations 5–8s, negative delays staggered so
+   nothing bobs in sync, and every cycle returns to the start point.
+   Reflection: cards also tilt in 3D as they float — rotate about diagonal
+   axes (rotateX/rotateY-style, max 1deg) under a parent perspective — and a
+   soft glossy sheen sweeps each card in step with its tilt (see the sheen
+   rules below). Nav and the terminal strip stay still. */
+/* 3D stage: the direct parents of tilting cards supply the perspective */
+section, header.hero, .herogrid, .aboutgrid, .edugrid, .skillindex, .achlist { perspective: 1100px; }
+@keyframes gentleA { 0%, 100% { translate: 0 0; rotate: 1 1 0 -0.9deg; } 50% { translate: 0 -8px; rotate: 1 1 0 0.9deg; } }
+@keyframes gentleB { 0%, 100% { translate: 0 0; rotate: 1 -1 0 0.8deg; } 50% { translate: 0 -6px; rotate: 1 -1 0 -0.8deg; } }
+@keyframes gentleC { 0%, 100% { translate: 0 0; rotate: 0.6 1 0 -0.7deg; } 50% { translate: 0 -10px; rotate: 0.6 1 0 0.8deg; } }
+@keyframes badgeFloat { 0%, 100% { translate: 0 0; rotate: 0deg; } 50% { translate: 0 -6px; rotate: 0.5deg; } }
+@keyframes sheenSweep { 0%, 100% { translate: -9% 0; } 50% { translate: 9% 0; } }
+/* cards & section blocks — gentle vertical drift + 3D tilt */
+.personcard { animation: gentleA 5.6s ease-in-out -0.5s infinite; }
+.factbox { animation: gentleB 6.3s ease-in-out -1.7s infinite; }
+.herometa { animation: gentleB 6.8s ease-in-out -0.8s infinite; }
+.stats { animation: gentleA 6.1s ease-in-out -2.9s infinite; }
+.case { animation: gentleA 5.9s ease-in-out -0.4s infinite; }
+.case.flip { animation-name: gentleB; animation-duration: 6.6s; animation-delay: -2.8s; }
+#case-01 { animation-delay: -1.2s; }
+.skillrow { animation: gentleB 5.4s ease-in-out infinite; }
+.skillrow:nth-child(2n) { animation-duration: 6.4s; animation-delay: -2.4s; }
+.skillrow:nth-child(3n) { animation-name: gentleA; animation-duration: 5.5s; animation-delay: -1.5s; }
+.skillrow:nth-child(4n) { animation-duration: 6.9s; animation-delay: -3.6s; }
+.expfeature { animation: gentleA 6.2s ease-in-out -1.9s infinite; }
+.apiplay { animation: gentleC 6.7s ease-in-out -0.6s infinite; }
+.educard { animation: gentleB 5.8s ease-in-out -1.1s infinite; }
+.educard + .educard { animation-name: gentleC; animation-duration: 6.9s; animation-delay: -3.9s; }
+.achlist li { animation: gentleB 5.7s ease-in-out infinite; }
+.achlist li:nth-child(2n) { animation-duration: 6.5s; animation-delay: -2.2s; }
+.achlist li:nth-child(3n) { animation-duration: 5.5s; animation-delay: -3.7s; }
+.contactblock { animation: gentleC 6.5s ease-in-out -1.4s infinite; }
+.badge { animation: badgeFloat 5.8s ease-in-out infinite; }
+.badge.building { animation-duration: 6.4s; animation-delay: -2.5s; }
+.badge.plain { animation-duration: 7.2s; animation-delay: -4.1s; }
+/* glossy reflection: a soft sheen band sweeps each tilting card in step with
+   its tilt. The layer is wider than the card but its gradient is transparent
+   well before the card edge, and the card clips it (overflow: clip), so the
+   band never shows outside the card's silhouette and cannot cause sideways
+   scroll. The person card and fact box keep their corner-bracket pseudos,
+   so their sheen rides as a background layer under the content instead,
+   swept by background-position on the same timing as their tilt. */
+@keyframes sheenBg { 0%, 100% { background-position: 115% 0, 0 0; } 50% { background-position: -15% 0, 0 0; } }
+.case, .expfeature, .apiplay, .skillrow, .stats, .herometa, .achlist li { position: relative; overflow: clip; }
+.educard, .contactblock { overflow: clip; }
+.case::after, .expfeature::after, .educard::after, .apiplay::after, .contactblock::after, .skillrow::after, .stats::after, .herometa::after, .achlist li::after {
+  content: ""; position: absolute; top: 0; bottom: 0; left: -25%; width: 150%; z-index: 1; pointer-events: none;
+  background: linear-gradient(100deg, transparent 32%, rgba(255,255,255,0.07) 45%, rgba(255,255,255,0.13) 50%, rgba(255,255,255,0.07) 55%, transparent 68%);
+}
+.case::after { animation: sheenSweep 5.9s ease-in-out -0.4s infinite; }
+.case.flip::after { animation-duration: 6.6s; animation-delay: -2.8s; }
+.expfeature::after { animation: sheenSweep 6.2s ease-in-out -1.9s infinite; }
+.educard::after { animation: sheenSweep 5.8s ease-in-out -1.1s infinite; }
+.educard + .educard::after { animation-duration: 6.9s; animation-delay: -3.9s; }
+.apiplay::after { animation: sheenSweep 6.7s ease-in-out -0.6s infinite; }
+.contactblock::after { animation: sheenSweep 6.5s ease-in-out -1.4s infinite; }
+.skillrow::after { animation: sheenSweep 5.4s ease-in-out infinite; }
+.skillrow:nth-child(2n)::after { animation-duration: 6.4s; animation-delay: -2.4s; }
+.skillrow:nth-child(3n)::after { animation-duration: 5.5s; animation-delay: -1.5s; }
+.skillrow:nth-child(4n)::after { animation-duration: 6.9s; animation-delay: -3.6s; }
+.stats::after { animation: sheenSweep 6.1s ease-in-out -2.9s infinite; }
+.herometa::after { animation: sheenSweep 6.8s ease-in-out -0.8s infinite; }
+.achlist li::after { animation: sheenSweep 5.7s ease-in-out infinite; }
+.achlist li:nth-child(2n)::after { animation-duration: 6.5s; animation-delay: -2.2s; }
+.achlist li:nth-child(3n)::after { animation-duration: 5.5s; animation-delay: -3.7s; }
+aside.personcard { background-image: linear-gradient(100deg, transparent 40%, rgba(255,255,255,0.10) 50%, transparent 60%), linear-gradient(180deg, var(--panel), var(--panel-2)); background-size: 250% 100%, 100% 100%; background-repeat: no-repeat; animation: gentleA 5.6s ease-in-out -0.5s infinite, sheenBg 5.6s ease-in-out -0.5s infinite; }
+aside.factbox { background-image: linear-gradient(100deg, transparent 40%, rgba(255,255,255,0.10) 50%, transparent 60%), linear-gradient(180deg, var(--panel), var(--panel-2)); background-size: 250% 100%, 100% 100%; background-repeat: no-repeat; animation: gentleB 6.3s ease-in-out -1.7s infinite, sheenBg 6.3s ease-in-out -1.7s infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .personcard, .factbox, .herometa, .stats, .case, .skillrow, .expfeature, .apiplay, .educard, .achlist li, .contactblock, .badge,
+  .case::after, .expfeature::after, .educard::after, .apiplay::after, .contactblock::after, .skillrow::after, .stats::after, .herometa::after, .achlist li::after { animation: none !important; }
+}
+
 /* ---------- stamps & stickers (the funk) ---------- */
 .stamp { font-family: "JetBrains Mono", monospace; font-size: 0.62rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; padding: 4px 10px; border: 2px solid currentColor; transform: rotate(-2deg); white-space: nowrap; }
 .stamp.ok { color: var(--green); }
@@ -130,7 +212,7 @@ section:hover .folio .no, header.hero .folio .no { transform: rotate(-4deg) scal
 .mast-nav a { text-decoration: none; font-weight: 600; font-size: 0.86rem; padding: 6px 10px; border-bottom: 2px solid transparent; color: var(--soft); }
 .mast-nav a:hover { color: var(--teal); }
 .mast-nav a.active { border-bottom-color: var(--sun); color: var(--ink); }
-.mast-nav a .n { font-family: "JetBrains Mono", monospace; font-size: 0.62rem; color: var(--sun); margin-right: 4px; vertical-align: super; }
+.mast-nav a .n { font-family: "JetBrains Mono", monospace; font-size: 0.7rem; color: var(--sun); margin-right: 4px; vertical-align: super; }
 #navToggle { display: none; margin-left: auto; width: 42px; height: 42px; border: 2px solid var(--line-2); background: var(--panel); color: var(--ink); font-size: 1.05rem; align-items: center; justify-content: center; }
 @media (max-width: 860px) {
   #navToggle { display: inline-flex; }
@@ -169,10 +251,10 @@ h1.headline .out { color: transparent; -webkit-text-stroke: 2px var(--soft); }
 .personcard .pc-top { display: flex; gap: 13px; align-items: center; padding-bottom: 11px; border-bottom: 1px solid var(--line-2); }
 .personcard .pc-mono { flex: none; width: 54px; height: 54px; display: flex; align-items: center; justify-content: center; background: var(--sun); color: #160A02; font-weight: 900; font-size: 1.25rem; letter-spacing: -0.03em; box-shadow: 5px 5px 0 rgba(63,224,197,0.35); }
 .personcard .pc-name { font-weight: 900; font-size: 1.12rem; line-height: 1.1; letter-spacing: -0.01em; text-transform: uppercase; color: var(--ink); }
-.personcard .pc-role { font-family: "JetBrains Mono", monospace; font-size: 0.66rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--teal); margin-top: 5px; }
+.personcard .pc-role { font-family: "JetBrains Mono", monospace; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--teal); margin-top: 5px; }
 .personcard .kv { padding: 8px 0; border-bottom: 1px solid var(--line); }
 .personcard .kv:last-child { border-bottom: none; }
-.personcard .k { font-family: "JetBrains Mono", monospace; font-size: 0.64rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--faint); }
+.personcard .k { font-family: "JetBrains Mono", monospace; font-size: 0.7rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--faint); }
 .personcard .v { font-weight: 800; font-size: 0.94rem; margin-top: 2px; line-height: 1.35; color: var(--ink); }
 .personcard .v .serif { color: var(--sun); font-weight: 500; }
 /* dossier photo — hero person-card + About subject file */
@@ -181,9 +263,9 @@ h1.headline .out { color: transparent; -webkit-text-stroke: 2px var(--soft); }
 .dossier-photo .dp-head span:last-child { color: var(--faint); font-weight: 400; }
 .dossier-photo img { display: block; width: 100%; height: auto; max-width: 100%; object-fit: contain; }
 .dossier-photo figcaption { padding: 7px 10px 9px; border-top: 1px solid var(--line-2); font-weight: 800; font-size: 0.92rem; line-height: 1.35; color: var(--ink); }
-.dossier-photo figcaption .dp-sub { display: block; margin-top: 3px; font-family: "JetBrains Mono", monospace; font-size: 0.62rem; font-weight: 400; letter-spacing: 0.13em; text-transform: uppercase; color: var(--muted); }
+.dossier-photo figcaption .dp-sub { display: block; margin-top: 3px; font-family: "JetBrains Mono", monospace; font-size: 0.7rem; font-weight: 400; letter-spacing: 0.13em; text-transform: uppercase; color: var(--muted); }
 .factbox .dossier-photo { margin: 0 0 9px; }
-.factbox .dossier-photo .dp-head { padding: 5px 9px; font-size: 0.56rem; }
+.factbox .dossier-photo .dp-head { padding: 5px 9px; font-size: 0.7rem; }
 .factbox .dossier-photo img { width: auto; max-width: 100%; max-height: 168px; margin: 0 auto; }
 .factbox .dossier-photo figcaption { font-size: 0.8rem; padding: 5px 8px 6px; line-height: 1.25; }
 /* solar system — second act, full width */
@@ -214,11 +296,11 @@ a.btn.dark { background: var(--ink); border-color: var(--ink); color: var(--void
 .herometa div { padding: 12px 14px; border-bottom: 1px solid var(--line); }
 .herometa div:nth-child(odd) { border-right: 1px solid var(--line); }
 .herometa div:nth-last-child(-n+2) { border-bottom: none; }
-.herometa .k { font-family: "JetBrains Mono", monospace; font-size: 0.64rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--teal); display: block; }
+.herometa .k { font-family: "JetBrains Mono", monospace; font-size: 0.7rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--teal); display: block; }
 .herometa .v { font-weight: 800; font-size: 0.98rem; display: block; margin-top: 2px; color: var(--ink); }
 
 /* solar stage — Fig. 01 plate */
-.solarwrap figcaption { display: flex; justify-content: space-between; gap: 14px; flex-wrap: wrap; margin-top: 10px; font-family: "JetBrains Mono", monospace; font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+.solarwrap figcaption { display: flex; justify-content: space-between; gap: 14px; flex-wrap: wrap; margin-top: 10px; font-family: "JetBrains Mono", monospace; font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
 .solarwrap figcaption b { color: var(--amber); }
 .solarstage { position: relative; overflow: hidden; min-width: 0; aspect-ratio: 1 / 0.94; min-height: 400px; background: radial-gradient(circle at 50% 46%, rgba(255,150,40,0.13), transparent 46%), radial-gradient(circle at 84% 10%, rgba(70,60,160,0.35), transparent 50%), radial-gradient(circle at 10% 90%, rgba(20,90,80,0.28), transparent 50%), var(--stage); border: 2px solid var(--line-2); box-shadow: 10px 10px 0 rgba(12,18,38,0.9), 10px 10px 0 2px var(--sun); touch-action: pan-y; }
 @media (min-width: 1020px) { .solarstage { min-height: 540px; } }
@@ -228,21 +310,21 @@ a.btn.dark { background: var(--ink); border-color: var(--ink); color: var(--void
 #planetTip { position: absolute; z-index: 8; pointer-events: none; opacity: 0; transform: translate(-50%, -135%); transition: opacity 0.18s ease; background: var(--panel); border: 2px solid var(--line-2); box-shadow: 5px 5px 0 var(--sun); padding: 12px 15px; max-width: 260px; min-width: 190px; color: var(--ink); }
 #planetTip.show { opacity: 1; }
 #planetTip .pt-name { font-weight: 900; font-size: 1.02rem; line-height: 1.2; text-transform: uppercase; letter-spacing: -0.01em; }
-#planetTip .pt-sub { font-family: "JetBrains Mono", monospace; font-size: 0.62rem; letter-spacing: 0.1em; color: var(--teal); margin-top: 4px; text-transform: uppercase; font-weight: 700; }
+#planetTip .pt-sub { font-family: "JetBrains Mono", monospace; font-size: 0.7rem; letter-spacing: 0.1em; color: var(--teal); margin-top: 4px; text-transform: uppercase; font-weight: 700; }
 #planetTip .pt-desc { color: var(--soft); font-size: 0.78rem; line-height: 1.45; margin-top: 6px; }
-.solar-hud { position: absolute; left: 14px; bottom: 12px; z-index: 6; font-family: "JetBrains Mono", monospace; font-size: 0.66rem; font-weight: 600; letter-spacing: 0.06em; color: var(--ink); background: rgba(7,10,24,0.78); border: 1px solid var(--line-2); padding: 6px 11px; }
+.solar-hud { position: absolute; left: 14px; bottom: 12px; z-index: 6; font-family: "JetBrains Mono", monospace; font-size: 0.66rem; font-weight: 600; letter-spacing: 0.05em; color: var(--ink); background: rgba(7,10,24,0.78); border: 1px solid var(--line-2); padding: 6px 11px; }
 .zoomctl { position: absolute; right: 12px; bottom: 10px; z-index: 6; display: flex; gap: 8px; }
 .zoomctl button { width: 40px; height: 40px; border: 1px solid var(--line-2); background: rgba(7,10,24,0.78); color: var(--ink); font-size: 1.15rem; font-weight: 700; display: flex; align-items: center; justify-content: center; }
 .zoomctl button:hover { background: var(--sun); border-color: var(--sun); color: #160A02; }
-.figtag { position: absolute; top: 12px; left: 14px; z-index: 6; font-family: "JetBrains Mono", monospace; font-size: 0.66rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink); background: rgba(7,10,24,0.78); border: 1px solid var(--line-2); padding: 6px 11px; }
+.figtag { position: absolute; top: 12px; left: 14px; z-index: 6; font-family: "JetBrains Mono", monospace; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink); background: rgba(7,10,24,0.78); border: 1px solid var(--line-2); padding: 6px 11px; }
 .figtag i { font-style: normal; color: var(--amber); }
 /* always-visible planet name labels — projected over the 3D scene */
-.planet-labels { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 5; }
-.planet-label { position: absolute; left: 0; top: 0; display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; pointer-events: none; font-family: "JetBrains Mono", monospace; font-size: 0.58rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink); background: rgba(7,10,24,0.84); border: 1px solid var(--line-2); padding: 3px 7px; line-height: 1.2; opacity: 0; will-change: left, top, transform; }
+.planet-labels { position: absolute; inset: 0; overflow: hidden; overflow: clip; contain: paint; pointer-events: none; z-index: 5; }
+.planet-label { position: absolute; left: 0; top: 0; display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; pointer-events: none; font-family: "JetBrains Mono", monospace; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink); background: rgba(7,10,24,0.84); border: 1px solid var(--line-2); padding: 3px 7px; line-height: 1.2; opacity: 0; will-change: left, top, transform; }
 .planet-label .pl-dot { flex: none; width: 5px; height: 5px; border-radius: 50%; background: var(--teal); }
-.planet-label.is-sun { border-color: var(--sun); color: var(--amber); font-size: 0.66rem; padding: 4px 9px; letter-spacing: 0.16em; box-shadow: 3px 3px 0 rgba(255,122,26,0.28); }
+.planet-label.is-sun { border-color: var(--sun); color: var(--amber); font-size: 0.7rem; padding: 4px 9px; letter-spacing: 0.16em; box-shadow: 3px 3px 0 rgba(255,122,26,0.28); }
 .planet-label.is-sun .pl-dot { background: var(--sun); width: 6px; height: 6px; }
-@media (max-width: 640px) { .planet-label { font-size: 0.5rem; padding: 2px 5px; gap: 4px; letter-spacing: 0.08em; } .planet-label.is-sun { font-size: 0.58rem; padding: 3px 7px; } }
+@media (max-width: 640px) { .planet-label { font-size: 0.7rem; padding: 2px 5px; gap: 4px; letter-spacing: 0.08em; } .planet-label.is-sun { font-size: 0.7rem; padding: 3px 7px; } }
 
 /* ---------- terminal typewriter strip (hero) ---------- */
 .termstrip { margin-top: 20px; max-width: 54ch; border: 1px solid var(--line-2); background: rgba(7,10,24,0.88); padding: 10px 14px; font-family: "JetBrains Mono", monospace; font-size: 0.8rem; line-height: 1.6; color: var(--teal); display: flex; align-items: baseline; gap: 2px; box-shadow: 5px 5px 0 rgba(12,18,38,0.9); }
@@ -269,19 +351,19 @@ a.btn.dark { background: var(--ink); border-color: var(--ink); color: var(--void
 /* ---------- API playground (Skills) ---------- */
 .apiplay { margin-top: 30px; border: 1px solid var(--line-2); background: linear-gradient(180deg, var(--panel), var(--panel-2)); }
 .apiplay .ap-head { display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: baseline; justify-content: space-between; padding: 10px 14px; border-bottom: 1px solid var(--line-2); font-family: "JetBrains Mono", monospace; font-size: 0.72rem; }
-.apiplay .ap-file { font-weight: 700; color: var(--ink); }
+.apiplay .ap-file { font-weight: 700; color: var(--ink); font-size: 0.75rem; }
 .apiplay .ap-file::before { content: "@RestController · "; color: var(--violet); font-weight: 400; }
-.apiplay .ap-tag { letter-spacing: 0.12em; text-transform: uppercase; font-size: 0.62rem; color: var(--teal); font-weight: 700; }
+.apiplay .ap-tag { letter-spacing: 0.12em; text-transform: uppercase; font-size: 0.7rem; color: var(--teal); font-weight: 700; }
 .apiplay .ap-body { display: grid; gap: 14px; padding: 14px; grid-template-columns: minmax(0, 1fr); }
 @media (min-width: 900px) { .apiplay .ap-body { grid-template-columns: minmax(0, 300px) minmax(0, 1fr); gap: 20px; } }
 .ap-eps { display: flex; flex-direction: column; gap: 7px; }
 .ap-ep { display: flex; align-items: center; gap: 10px; text-align: left; border: 1.5px solid var(--line-2); background: var(--void-2); color: var(--soft); padding: 9px 12px; font-family: "JetBrains Mono", monospace; font-size: 0.8rem; min-height: 2.6rem; }
-.ap-ep .m { color: var(--green); font-weight: 700; font-size: 0.68rem; letter-spacing: 0.08em; }
+.ap-ep .m { color: var(--green); font-weight: 700; font-size: 0.7rem; letter-spacing: 0.08em; }
 .ap-ep:hover { border-color: var(--teal); color: var(--ink); }
 .ap-ep.sel { border-color: var(--sun); color: var(--ink); box-shadow: 3px 3px 0 rgba(255,122,26,0.35); }
 .ap-exec { margin-top: 12px; padding: 11px 20px; min-height: 2.7rem; font-size: 0.88rem; }
 .ap-outbar { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; justify-content: space-between; }
-.ap-status { font-family: "JetBrains Mono", monospace; font-size: 0.68rem; letter-spacing: 0.08em; color: var(--muted); }
+.ap-status { font-family: "JetBrains Mono", monospace; font-size: 0.75rem; letter-spacing: 0.05em; color: var(--muted); }
 .ap-status.ok { color: var(--green); font-weight: 700; }
 .ap-copy { margin-top: 0; padding: 7px 13px; min-height: 2.2rem; font-size: 0.78rem; }
 .ap-copy:disabled { opacity: 0.45; cursor: default; }
@@ -310,7 +392,7 @@ section { padding: 42px 0 4px; position: relative; }
 h2.sectitle { font-weight: 900; text-transform: uppercase; letter-spacing: -0.022em; line-height: 0.98; font-size: clamp(2rem, 5vw, 3.6rem); margin-top: 18px; max-width: 16ch; color: var(--ink); }
 h2.sectitle .serif { text-transform: none; color: var(--sun); letter-spacing: -0.01em; }
 h2.sectitle .out { color: transparent; -webkit-text-stroke: 1.6px var(--soft); }
-.secsub { color: var(--muted); margin-top: 16px; max-width: 58ch; font-size: 1.02rem; }
+.secsub { color: var(--muted); margin-top: 16px; max-width: 58ch; font-size: 1.02rem; text-wrap: pretty; }
 .secsub strong { color: var(--ink); }
 
 /* ---------- about ---------- */
@@ -327,11 +409,11 @@ h2.sectitle .out { color: transparent; -webkit-text-stroke: 1.6px var(--soft); }
 .factbox::before, .factbox::after { content: ""; position: absolute; width: 14px; height: 14px; border-color: var(--sun); border-style: solid; }
 .factbox::before { top: -2px; left: -2px; border-width: 3px 0 0 3px; }
 .factbox::after { bottom: -2px; right: -2px; border-width: 0 3px 3px 0; }
-.factbox h3 { font-family: "JetBrains Mono", monospace; font-size: 0.64rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; padding-bottom: 7px; border-bottom: 1px solid var(--line-2); color: var(--teal); }
+.factbox h3 { font-family: "JetBrains Mono", monospace; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; padding-bottom: 7px; border-bottom: 1px solid var(--line-2); color: var(--teal); }
 .factbox .kv { padding: 5px 0; border-bottom: 1px solid var(--line); }
 .factbox .kv:last-child { border-bottom: none; }
-.factbox .k { font-family: "JetBrains Mono", monospace; font-size: 0.58rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--faint); }
-.factbox .v { font-weight: 800; font-size: 0.87rem; margin-top: 1px; line-height: 1.3; color: var(--ink); }
+.factbox .k { font-family: "JetBrains Mono", monospace; font-size: 0.7rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--faint); }
+.factbox .v { font-weight: 800; font-size: 0.87rem; margin-top: 1px; line-height: 1.3; color: var(--ink); text-wrap: pretty; }
 
 /* ---------- skills: orbital registry ---------- */
 .skillindex { margin-top: 28px; border-top: 2px solid var(--line-2); }
@@ -341,10 +423,10 @@ h2.sectitle .out { color: transparent; -webkit-text-stroke: 1.6px var(--soft); }
 .skillrow .idx { font-family: "JetBrains Mono", monospace; font-size: 0.78rem; font-weight: 700; color: var(--sun); padding-top: 8px; }
 .skillrow h3 { font-weight: 900; font-size: clamp(1.25rem, 2.4vw, 1.7rem); line-height: 1.02; letter-spacing: -0.02em; text-transform: uppercase; color: var(--ink); transition: color 0.18s ease, transform 0.18s ease; }
 .skillrow:hover h3 { color: var(--amber); transform: translateX(6px); }
-.skillrow .orbit { font-family: "JetBrains Mono", monospace; font-size: 0.66rem; font-weight: 600; letter-spacing: 0.13em; text-transform: uppercase; color: var(--teal); margin-top: 4px; }
+.skillrow .orbit { font-family: "JetBrains Mono", monospace; font-size: 0.66rem; font-weight: 600; letter-spacing: 0.13em; text-transform: uppercase; color: var(--teal); margin-top: 4px; text-wrap: pretty; }
 .skillrow p.desc { color: var(--soft); font-size: 0.97rem; max-width: 52ch; padding-top: 4px; }
 .skillrow .moons { padding-top: 4px; }
-.skillrow .moons .mk { font-family: "JetBrains Mono", monospace; font-size: 0.62rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--faint); display: block; margin-bottom: 6px; }
+.skillrow .moons .mk { font-family: "JetBrains Mono", monospace; font-size: 0.7rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--faint); display: block; margin-bottom: 6px; }
 .skillrow .moons li { font-weight: 700; font-size: 0.9rem; line-height: 1.5; color: var(--ink); }
 .skillrow .moons li::before { content: "→ "; color: var(--teal); font-weight: 900; }
 .learnhead { display: flex; align-items: baseline; gap: 18px; flex-wrap: wrap; margin-top: 34px; }
@@ -356,7 +438,7 @@ h2.sectitle .out { color: transparent; -webkit-text-stroke: 1.6px var(--soft); }
 @media (min-width: 820px) { .learnlist li { grid-template-columns: minmax(0, 2.4fr) minmax(0, 5fr) auto; align-items: baseline; } }
 .learnlist .lt { font-weight: 800; font-size: 1.08rem; color: var(--ink); }
 .learnlist .ld { color: var(--muted); font-size: 0.94rem; }
-.learnlist .lstat { font-family: "JetBrains Mono", monospace; font-size: 0.66rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--violet); border: 1.5px dashed var(--violet); padding: 4px 10px; white-space: nowrap; justify-self: start; transform: rotate(-1deg); }
+.learnlist .lstat { font-family: "JetBrains Mono", monospace; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--violet); border: 1.5px dashed var(--violet); padding: 4px 10px; white-space: nowrap; justify-self: start; transform: rotate(-1deg); }
 
 /* ---------- experience ---------- */
 .expfeature { margin-top: 28px; display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr); border: 1px solid var(--line-2); background: linear-gradient(180deg, var(--panel), var(--panel-2)); padding: clamp(16px, 2.8vw, 26px); }
@@ -382,7 +464,7 @@ h2.sectitle .out { color: transparent; -webkit-text-stroke: 1.6px var(--soft); }
 .mile .m-when { font-family: "JetBrains Mono", monospace; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
 .mile h3 { font-weight: 900; font-size: 1.12rem; line-height: 1.15; letter-spacing: -0.01em; color: var(--ink); }
 .mile p { color: var(--muted); font-size: 0.95rem; }
-.mile .tag { display: inline-block; font-family: "JetBrains Mono", monospace; font-size: 0.62rem; font-weight: 700; letter-spacing: 0.13em; text-transform: uppercase; padding: 3px 9px; margin-bottom: 8px; transform: rotate(-1.6deg); }
+.mile .tag { display: inline-block; font-family: "JetBrains Mono", monospace; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.13em; text-transform: uppercase; padding: 3px 9px; margin-bottom: 8px; transform: rotate(-1.6deg); }
 .mile.now .tag { background: var(--sun); color: #160A02; }
 .mile.next .tag { border: 1.5px dashed var(--violet); color: var(--violet); }
 .mile.now h3 { color: var(--amber); }
@@ -394,7 +476,7 @@ h2.sectitle .out { color: transparent; -webkit-text-stroke: 1.6px var(--soft); }
 .case .c-meta .no { color: var(--sun); font-size: 0.9rem; }
 .case .c-meta .kind { color: var(--muted); font-weight: 400; }
 .case .c-meta .badge { margin-left: auto; }
-.badge { font-family: "JetBrains Mono", monospace; font-size: 0.64rem; font-weight: 700; letter-spacing: 0.13em; text-transform: uppercase; padding: 4px 10px; display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; border: 2px solid currentColor; transform: rotate(-2deg); }
+.badge { font-family: "JetBrains Mono", monospace; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.13em; text-transform: uppercase; padding: 4px 10px; display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; border: 2px solid currentColor; transform: rotate(-2deg); }
 .badge.live { color: var(--green); background: rgba(123,216,143,0.08); }
 .badge.live::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--green); }
 .badge.building { color: var(--amber); background: rgba(255,179,71,0.07); transform: rotate(1.6deg); }
@@ -403,12 +485,12 @@ h2.sectitle .out { color: transparent; -webkit-text-stroke: 1.6px var(--soft); }
 .case h3 .serif { text-transform: none; color: var(--sun); }
 .casegrid { display: grid; gap: 12px 36px; margin-top: 12px; grid-template-columns: minmax(0, 1fr); }
 @media (min-width: 960px) { .casegrid { grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); } .case.flip .casegrid { grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); } .case.flip .c-body { order: 2; } .case.flip .c-side { order: 1; } }
-.case .c-desc { font-size: 1.02rem; line-height: 1.5; color: var(--ink); max-width: 52ch; }
+.case .c-desc { font-size: 1.02rem; line-height: 1.5; color: var(--ink); max-width: 52ch; text-wrap: pretty; }
 .case .c-desc em { font-family: "Newsreader", serif; font-size: 1.05em; }
 .case ul.points { margin-top: 11px; }
 .case ul.points li { display: flex; gap: 12px; padding: 6px 0; border-top: 1px solid var(--line); font-weight: 600; font-size: 0.97rem; color: var(--soft); }
 .case ul.points li::before { content: "▸"; color: var(--teal); font-weight: 900; flex: none; }
-.case .stacklabel { font-family: "JetBrains Mono", monospace; font-size: 0.64rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--teal); }
+.case .stacklabel { font-family: "JetBrains Mono", monospace; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--teal); }
 .stackrow { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 10px; }
 .stackrow li { font-family: "JetBrains Mono", monospace; font-size: 0.7rem; font-weight: 600; padding: 5px 10px; border: 1.5px solid var(--line-2); color: var(--soft); background: var(--void-2); transition: border-color 0.18s ease, color 0.18s ease; }
 .stackrow li:hover { border-color: var(--teal); color: var(--teal); }
@@ -430,7 +512,7 @@ h2.sectitle .out { color: transparent; -webkit-text-stroke: 1.6px var(--soft); }
 .educard p { color: var(--muted); font-size: 0.97rem; margin-top: 12px; max-width: 44ch; }
 .educard .e-score { display: flex; align-items: baseline; gap: 12px; margin-top: 13px; }
 .educard .e-score b { font-weight: 900; font-size: clamp(2.5rem, 5vw, 3.6rem); line-height: 0.9; letter-spacing: -0.03em; color: var(--amber); font-variant-numeric: tabular-nums; }
-.educard .e-score span { font-family: "JetBrains Mono", monospace; font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+.educard .e-score span { font-family: "JetBrains Mono", monospace; font-size: 0.7rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
 
 /* ---------- achievements: commendations log ---------- */
 .achlist { margin-top: 28px; border-top: 2px solid var(--line-2); counter-reset: ach; }
@@ -440,7 +522,7 @@ h2.sectitle .out { color: transparent; -webkit-text-stroke: 1.6px var(--soft); }
 .achlist .a-no::before { content: counter(ach, decimal-leading-zero); font-weight: 900; font-size: clamp(1.7rem, 3.4vw, 2.6rem); line-height: 1; letter-spacing: -0.02em; color: transparent; -webkit-text-stroke: 1.5px var(--line-2); }
 .achlist h3 { font-weight: 800; font-size: 1.14rem; line-height: 1.3; letter-spacing: -0.005em; color: var(--ink); }
 .achlist p { color: var(--muted); font-size: 0.94rem; }
-.achlist .a-tag { font-family: "JetBrains Mono", monospace; font-size: 0.64rem; font-weight: 700; letter-spacing: 0.13em; text-transform: uppercase; color: var(--teal); white-space: nowrap; }
+.achlist .a-tag { font-family: "JetBrains Mono", monospace; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.13em; text-transform: uppercase; color: var(--teal); white-space: nowrap; }
 
 /* ---------- contact: final transmission ---------- */
 .contactblock { margin-top: 28px; background: linear-gradient(160deg, #101736, var(--panel-2)); color: var(--ink); padding: clamp(22px, 4vw, 38px); position: relative; border: 2px solid var(--sun); box-shadow: 10px 10px 0 rgba(255,122,26,0.14); }
@@ -456,7 +538,7 @@ h2.sectitle .out { color: transparent; -webkit-text-stroke: 1.6px var(--soft); }
 @media (min-width: 820px) { .contactitem { padding: 18px 22px 6px; } .contactitem:first-child { padding-left: 4px; } }
 .contactitem + .contactitem { border-top: 1px solid var(--line-2); }
 @media (min-width: 820px) { .contactitem + .contactitem { border-top: none; } }
-.contactitem .c-label { font-family: "JetBrains Mono", monospace; font-size: 0.66rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--teal); }
+.contactitem .c-label { font-family: "JetBrains Mono", monospace; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--teal); }
 .contactitem a.c-value { display: inline-block; margin-top: 8px; font-weight: 900; font-size: clamp(1.25rem, 3.4vw, 1.8rem); letter-spacing: -0.015em; color: var(--ink); text-decoration: none; word-break: break-all; border-bottom: 3px solid var(--teal); padding-bottom: 3px; }
 .contactitem a.c-value:hover { color: var(--teal); }
 .contactitem .c-note { color: var(--muted); font-size: 0.9rem; margin-top: 10px; }
@@ -478,7 +560,7 @@ footer .top-link { font-weight: 800; text-decoration: none; border-bottom: 2px s
 /* ---------- Ask Himaksh AI ---------- */
 .askfab { position: fixed; right: 18px; bottom: 18px; z-index: 120; display: inline-flex; align-items: center; gap: 10px; background: var(--sun); border: 2px solid var(--sun); color: #160A02; font-weight: 900; font-size: 0.9rem; padding: 13px 20px; min-height: 3rem; box-shadow: 5px 5px 0 rgba(63,224,197,0.4); transition: transform 0.2s ease, background 0.2s ease; }
 .askfab:hover { transform: translate(-2px, -2px); background: var(--amber); }
-.askfab .dot { width: 9px; height: 9px; border-radius: 50%; background: #160A02; flex: none; animation: askpulse 2s ease-in-out infinite; }
+.askfab .dot { width: 9px; height: 9px; border-radius: 50%; background: #160A02; flex: none; }
 @keyframes askpulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
 .askpanel { position: fixed; right: 18px; bottom: 84px; z-index: 121; width: min(402px, calc(100vw - 24px)); height: min(580px, calc(100dvh - 108px)); display: none; flex-direction: column; background: linear-gradient(180deg, var(--panel), var(--panel-2)); border: 2px solid var(--line-2); box-shadow: 10px 10px 0 rgba(12,18,38,0.9), 10px 10px 0 2px var(--sun); }
 .askpanel.open { display: flex; }
@@ -555,7 +637,7 @@ footer .top-link { font-weight: 800; text-decoration: none; border-bottom: 2px s
   /* solar system: square-ish stage, compact chrome, no HUD/zoom overlap */
   .solarsection { padding-top: 30px; }
   .solarstage { aspect-ratio: 1 / 1; min-height: 330px; }
-  .figtag { top: 8px; left: 8px; font-size: 0.58rem; padding: 5px 8px; letter-spacing: 0.1em; }
+  .figtag { top: 8px; left: 8px; font-size: 0.7rem; padding: 5px 8px; letter-spacing: 0.1em; }
   .solar-hud { left: 8px; bottom: 8px; font-size: 0.57rem; letter-spacing: 0.02em; padding: 5px 8px; max-width: calc(100% - 124px); line-height: 1.45; }
   .zoomctl { right: 8px; bottom: 8px; gap: 6px; }
   .zoomctl button { width: 44px; height: 44px; font-size: 1.25rem; }
@@ -563,9 +645,9 @@ footer .top-link { font-weight: 800; text-decoration: none; border-bottom: 2px s
   #planetTip .pt-name { font-size: 0.92rem; }
   .planetdrawer { bottom: 60px; }
   .planetdrawer .pd-close { width: 40px; height: 40px; }
-  .planet-label { font-size: 0.46rem; padding: 1px 4px; gap: 3px; letter-spacing: 0.05em; }
+  .planet-label { font-size: 0.7rem; padding: 1px 4px; gap: 3px; letter-spacing: 0.05em; }
   .planet-label .pl-dot { width: 4px; height: 4px; }
-  .planet-label.is-sun { font-size: 0.54rem; padding: 2px 6px; }
+  .planet-label.is-sun { font-size: 0.7rem; padding: 2px 6px; }
 
   /* section headers */
   h2.sectitle { font-size: clamp(1.85rem, 8.6vw, 2.6rem); max-width: none; }
@@ -1581,10 +1663,18 @@ footer .top-link { font-weight: 800; text-decoration: none; border-bottom: 2px s
             if (projV.z > 1 || projV.z < -1) { el.style.opacity = "0"; return; }
             var w = stage.clientWidth, h = stage.clientHeight;
             if (!w || !h) { el.style.opacity = "0"; return; }
-            el.style.left = ((projV.x * 0.5 + 0.5) * w) + "px";
-            el.style.top = ((-projV.y * 0.5 + 0.5) * h) + "px";
+            var lx = (projV.x * 0.5 + 0.5) * w, ly = (-projV.y * 0.5 + 0.5) * h;
+            /* a planet outside the frame projects far past the stage; its label
+               was only ever clipped by the label wrap, so park it invisibly at
+               the nearest edge instead of letting it sit off-stage. Visible
+               labels are also centred on their planet, so clamp the centre by
+               the label's half-width: the whole tag stays inside the stage. */
+            var off = lx < -30 || lx > w + 30 || ly < -30 || ly > h + 30;
+            if (el._hw === undefined) { el._hw = (el.offsetWidth / 2) || 40; }
+            el.style.left = Math.min(Math.max(lx, el._hw), Math.max(el._hw, w - el._hw)) + "px";
+            el.style.top = (off ? Math.min(Math.max(ly, 0), h) : ly) + "px";
             el.style.transform = "translate(-50%,-50%) translateY(-" + lift + "px)";
-            el.style.opacity = "1";
+            el.style.opacity = off ? "0" : "1";
           }
 
           /* ---- interaction ---- */
